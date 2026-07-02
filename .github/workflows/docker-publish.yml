@@ -36,7 +36,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GHCR_PAT }}
 
       - name: Extract image metadata
         id: meta
@@ -58,19 +58,5 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Trigger Dokploy deploy
-        env:
-          DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
-          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
-          DOKPLOY_APPLICATION_ID: ${{ secrets.DOKPLOY_APPLICATION_ID }}
-        run: |
-          set -euo pipefail
-          payload=$(jq -cn --arg id "$DOKPLOY_APPLICATION_ID" '{applicationId:$id}')
-          status=$(curl -fsS --max-time 30 \
-            -o /dev/null -w "%{http_code}" \
-            -X POST "${DOKPLOY_URL%/}/api/application.deploy" \
-            -H "x-api-key: ${DOKPLOY_API_KEY}" \
-            -H "Content-Type: application/json" \
-            --data "$payload")
-          echo "Dokploy responded: $status"
-          [ "$status" = "200" ] || exit 1
+      # Dokploy deploy is triggered manually via Hermes MCP tools
+      # (GH runner 404 issue documented in dokploy-ghcr-deploy Gotcha #25)
