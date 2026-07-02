@@ -1,24 +1,19 @@
 #!/bin/bash
 set -e
-
-# Initialize and start PostgreSQL
-if [ ! -d /var/lib/postgresql/16/main ]; then
-    mkdir -p /var/lib/postgresql/16/main
+PGVER=15
+PGDATA=/var/lib/postgresql/$PGVER/main
+if [ ! -d "$PGDATA" ]; then
+    mkdir -p /var/lib/postgresql/$PGVER
     chown -R postgres:postgres /var/lib/postgresql
-    su - postgres -c "/usr/lib/postgresql/16/bin/initdb -D /var/lib/postgresql/16/main"
+    su - postgres -c "/usr/lib/postgresql/$PGVER/bin/initdb -D $PGDATA"
 fi
-su - postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D /var/lib/postgresql/16/main -l /var/log/postgresql.log start" 2>/dev/null || true
-
-# Wait for PG to be ready
+su - postgres -c "/usr/lib/postgresql/$PGVER/bin/pg_ctl -D $PGDATA -l /var/log/postgresql.log start" 2>/dev/null || true
 for i in $(seq 1 10); do
     su - postgres -c "pg_isready" &>/dev/null && break
     sleep 1
 done
-
-# Create database and user
 su - postgres -c "psql -tc "SELECT 1 FROM pg_roles WHERE rolname='app'" | grep -q 1" ||     su - postgres -c "psql -c "CREATE USER app WITH PASSWORD 'changemer';""
 su - postgres -c "psql -tc "SELECT 1 FROM pg_database WHERE datname='chama'" | grep -q 1" ||     su - postgres -c "psql -c "CREATE DATABASE chama OWNER app;""
-
 cd /app/backend
 echo "Running database migrations..."
 alembic upgrade head 2>/dev/null || echo "No migrations to run, continuing..."
