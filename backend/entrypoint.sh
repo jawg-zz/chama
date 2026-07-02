@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+cd /app/backend
+
 echo "Running database migrations..."
 alembic upgrade head 2>/dev/null || echo "No migrations to run, continuing..."
 
