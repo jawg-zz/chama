@@ -14,10 +14,10 @@ if [ -n "$PGDIR" ]; then
         su - postgres -c "pg_isready" &>/dev/null && break
         sleep 1
     done
-    su - postgres -c "psql -tc \"SELECT 1 FROM pg_roles WHERE rolname='app'\" | grep -q 1" 2>/dev/null || \
-        su - postgres -c "psql -c \"CREATE USER app WITH PASSWORD 'changemer';\"" 2>/dev/null || true
+    su - postgres -c "psql -tc \"SELECT 1 FROM pg_roles WHERE rolname='chama'\" | grep -q 1" 2>/dev/null || \
+        su - postgres -c "psql -c \"CREATE USER chama WITH PASSWORD 'chama_password';\"" 2>/dev/null || true
     su - postgres -c "psql -tc \"SELECT 1 FROM pg_database WHERE datname='chama'\" | grep -q 1" 2>/dev/null || \
-        su - postgres -c "psql -c \"CREATE DATABASE chama OWNER app;\"" 2>/dev/null || true
+        su - postgres -c "psql -c \"CREATE DATABASE chama OWNER chama;\"" 2>/dev/null || true
 fi
 
 cd /app/backend
