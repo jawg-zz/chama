@@ -29,6 +29,8 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /app/backend /app/backend
 COPY --from=builder /app/frontend/dist /app/frontend/dist
 
+# Copy backend source code (NOT in builder because builder only had requirements.txt)
+COPY backend/ /app/backend/
 COPY backend/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
